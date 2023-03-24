@@ -166,7 +166,7 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
         while(curr!=nullptr){
             if(newNode->getKey()==curr->getKey()){
                 curr->setValue(new_item.second);
-                break;
+                return;
             }
             else if(newNode->getKey() < curr->getKey()){
                 if(curr->getLeft()==nullptr){
@@ -174,12 +174,12 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                     newNode->setParent(curr);
                     if(curr->getBalance()==1){
                         curr->setBalance(0);
-                        break;
+                        return;
                     }
                     else if(curr->getBalance()==0){
                         curr->setBalance(-1);
-                        insertFix(curr,curr->getLeft());
-                        break;
+                        insertFix(curr,newNode);
+                        return;
                     }
                     
                 }
@@ -187,18 +187,18 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                     curr = curr->getLeft();
                 }
             }
-            else if(newNode->getKey() > curr->getKey()){
+            else{
                 if(curr->getRight()==nullptr){
                     curr->setRight(newNode);
                     newNode->setParent(curr);
                     if(curr->getBalance()==-1){
                         curr->setBalance(0);
-                        break;
+                        return;
                     }
                     else if(curr->getBalance()==0){
                         curr->setBalance(1);
-                        insertFix(curr,curr->getRight());
-                        break;
+                        insertFix(curr,newNode);
+                        return;
                     }
                     
                 }
@@ -236,12 +236,16 @@ template<class Key, class Value>
 void AVLTree<Key,Value>::rotateLeft(AVLNode<Key,Value>* curr)
 {
     AVLNode<Key,Value>* child = curr->getRight();
+
     if(curr->getParent()==nullptr){
         (this->root_) = child;
-    }
+        child->setParent(nullptr);
+        }
     else{
-            AVLNode<Key,Value>* grandparent = curr->getParent();
+    
+    AVLNode<Key,Value>* grandparent = curr->getParent();
     child->setParent(grandparent);
+
     if(grandparent->getLeft()==curr){
         grandparent->setLeft(child);
     }
@@ -249,34 +253,58 @@ void AVLTree<Key,Value>::rotateLeft(AVLNode<Key,Value>* curr)
         grandparent->setRight(child);
     }
     }
-
+           if(child->getLeft() != nullptr){
+        AVLNode<Key,Value>* temp = child->getLeft();
+        curr->setRight(temp);
+        temp->setParent(curr);
+        child->setLeft(curr);
+    curr->setParent(child);
+    }
+else{
     child->setLeft(curr);
     curr->setParent(child);
     curr->setRight(nullptr);
 }
 
-template<class Key, class Value>
-void AVLTree<Key,Value>::rotateRight(AVLNode<Key,Value>* curr)
-{
-    AVLNode<Key,Value>* child= curr->getLeft();
-    if(curr->getParent()==nullptr){
-        (this->root_) = child;
-    }
-    else{
-            AVLNode<Key,Value>* grandparent = curr->getParent();
-    child->setParent(grandparent);
-    if(grandparent->getLeft()==curr){
-        grandparent->setLeft(child);
-    }
-    else if(grandparent->getRight()==curr){
-        grandparent->setRight(child);
-    }
-    }
 
     
+}
+
+template<class Key, class Value>
+void AVLTree<Key,Value>::rotateRight(AVLNode<Key,Value>* curr)
+{ AVLNode<Key,Value>* child = curr->getLeft();
+
+    if(curr->getParent()==nullptr){
+        (this->root_) = child;
+        child->setParent(nullptr);
+        }
+    else{
+    
+    AVLNode<Key,Value>* grandparent = curr->getParent();
+    child->setParent(grandparent);
+
+    if(grandparent->getRight()==curr){
+        grandparent->setRight(child);
+    }
+    else if(grandparent->getLeft()==curr){
+        grandparent->setLeft(child);
+    }
+    }
+           if(child->getRight() != nullptr){
+        AVLNode<Key,Value>* temp = child->getRight();
+        curr->setLeft(temp);
+        temp->setParent(curr);
+        child->setRight(curr);
+    curr->setParent(child);
+    }
+else{
     child->setRight(curr);
     curr->setParent(child);
     curr->setLeft(nullptr);
+}
+
+
+    
 }
 template<class Key, class Value>
 void AVLTree<Key,Value>::insertFix(AVLNode<Key,Value>* current,AVLNode<Key,Value>* child){
